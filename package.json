@@ -1,0 +1,43 @@
+{
+  "name": "crypto-arbitrage-bot",
+  "version": "0.0.0",
+  "description": "Makes money",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node -r babel-register src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/razvanz/crypto-arbitrage-bot.git"
+  },
+  "keywords": [
+    "money"
+  ],
+  "author": "Razvan Laurus <razvanlaurus@gmail.com>",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/razvanz/crypto-arbitrage-bot/issues"
+  },
+  "homepage": "https://github.com/razvanz/crypto-arbitrage-bot#readme",
+  "dependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-register": "^6.26.0",
+    "debug": "^3.1.0",
+    "kraken-api": "^1.0.0",
+    "promise-retry": "^1.1.1",
+    "yargs": "^10.0.3"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.0.3",
+    "eslint": "^4.12.1",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-promise": "^3.6.0",
+    "eslint-plugin-standard": "^3.0.1"
+  }
+}
