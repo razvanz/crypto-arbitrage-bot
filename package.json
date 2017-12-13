@@ -27,6 +27,7 @@
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-register": "^6.26.0",
     "debug": "^3.1.0",
+    "gdax": "^0.4.2",
     "kraken-api": "^1.0.0",
     "promise-retry": "^1.1.1",
     "yargs": "^10.0.3"

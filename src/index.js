@@ -2,6 +2,7 @@ const _ = require('lodash')
 const argv = require('yargs').argv
 const Graph = require('./asset-graph')
 const KrakenClient = require('./exchanges/kraken/')
+const GdaxClient = require('./exchanges/gdax/')
 
 const creds = require('../.kraken')
 const INTERVAL = (argv.interval ? parseFloat(argv.interval) : 2) * 1000
@@ -12,6 +13,7 @@ const MAX_TRX = argv.maxTransactions ? parseInt(argv.maxTransactions, 10) : 3
 // main
 ;(async () => {
   const exchange = new KrakenClient(creds)
+  // const exchange = new GdaxClient(GdaxCreds)
   const graph = await setupGraph(exchange)
 
   scheduleCalculation(graph, exchange)
