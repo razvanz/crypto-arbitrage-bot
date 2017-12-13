@@ -6,6 +6,24 @@ const promiseRetry = require('promise-retry')
 class Kraken extends KrakenApi {
   constructor (credentials) {
     super(credentials.api_key, credentials.secret_key)
+
+    // Increase to 10s
+    this.config.timeout = 10000
+  }
+
+  /**
+   * Retrieve account balance for all owned currencies
+   * @return {Array<Object>}  Array of currencies and their corresponding balance
+   */
+  async getBalance () {
+    return _(await this.request('Balance'))
+      .map((balance, name) => ({
+        name: name.length > 3 && (name.startsWith('X') || name.startsWith('Z'))
+          ? name.slice(-3)
+          : name,
+        amount: parseFloat(balance)
+      }))
+      .value()
   }
 
   /**
@@ -90,7 +108,7 @@ class Kraken extends KrakenApi {
       return this.api(...args)
         .then(response => response.result)
         .catch(retry)
-    }, { retries: 2, minTimeout: 1, maxTimeout: 5000 })
+    }, { retries: 5, minTimeout: 1, maxTimeout: 5000 })
   }
 
   stripAssetType (asset) {

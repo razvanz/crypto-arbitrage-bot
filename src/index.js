@@ -4,6 +4,8 @@ const Graph = require('./asset-graph')
 const KrakenClient = require('./exchanges/kraken/')
 
 const creds = require('../.kraken')
+
+const CURRENCY = argv.currency || 'EUR'
 const INTERVAL = (argv.interval ? parseFloat(argv.interval) : 2) * 1000
 const MIN_ROI = argv.minRoi ? parseFloat(argv.minRoi) : 1 // return of investment
 const MIN_TRX = argv.minTransactions ? parseInt(argv.minTransactions, 10) : 2
@@ -12,8 +14,22 @@ const MAX_TRX = argv.maxTransactions ? parseInt(argv.maxTransactions, 10) : 3
 // main
 ;(async () => {
   const exchange = new KrakenClient(creds)
-  const graph = await setupGraph(exchange)
+  const balances = await exchange.getBalance()
+  const currencyBalance = _.get(_.find(balances, { name: CURRENCY }), 'amount')
 
+  console.log('Account balances: ', _.map(balances, b => `${b.name}=${b.amount}`).join(' '))
+
+  // Require balance in currency
+  if (!currencyBalance) {
+    throw new Error(`Zero balance available for currency: ${CURRENCY}`)
+  }
+
+  // For now fail if there are balances in other currencies. Just to avoid issues.
+  // if (balances.length > 1) {
+  //   throw new Error(`Found balances in other currencies than: ${CURRENCY}`)
+  // }
+
+  const graph = await setupGraph(exchange)
   scheduleCalculation(graph, exchange)
 })()
 
@@ -63,12 +79,14 @@ async function updateWeights (graph, exchange) {
 }
 
 function findProfitableArbitrage (graph) {
-  const arbitrage = graph.findHighestROIArbitrage('EUR', MIN_TRX, MAX_TRX)
+  const arbitrage = graph.findHighestROIArbitrage(CURRENCY, MIN_TRX, MAX_TRX)
 
   if (arbitrage.roi > MIN_ROI) {
     console.log(
-      'Found profitable arbitrage: ',
-      `${_.map(arbitrage, e => e.toString()).join(' > ')} = ROI: ${arbitrage.roi}%`
+      new Date().toISOString(),
+      `${CURRENCY} > ${_.map(arbitrage, e => e.id2).join(' > ')} = ROI: ${arbitrage.roi}%`
     )
+
+    return arbitrage
   }
 }
