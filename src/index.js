@@ -4,25 +4,17 @@ const Graph = require('./asset-graph')
 const KrakenClient = require('./exchanges/kraken/')
 
 const creds = require('../.kraken')
+const INTERVAL = (argv.interval ? parseFloat(argv.interval) : 2) * 1000
+const MIN_ROI = argv.minRoi ? parseFloat(argv.minRoi) : 1 // return of investment
+const MIN_TRX = argv.minTransactions ? parseInt(argv.minTransactions, 10) : 2
+const MAX_TRX = argv.maxTransactions ? parseInt(argv.maxTransactions, 10) : 3
 
 // main
 ;(async () => {
-  const INTERVAL = argv.interval ? parseFloat(argv.interval) : 2 // check interval in seconds
-  const MIN_ROI = argv.minRoi ? parseFloat(argv.minRoi) : 1 // return of investment
-  const MIN_TRX = argv.minTransactions ? parseInt(argv.minTransactions, 10) : 3
-  const MAX_TRX = argv.maxTransactions ? parseInt(argv.maxTransactions, 10) : 4
-
   const exchange = new KrakenClient(creds)
   const graph = await setupGraph(exchange)
 
-  setInterval(async () => {
-    try {
-      await updateWeights(graph, exchange)
-      findProfitableArbitrage(graph, MIN_TRX, MAX_TRX, MIN_ROI)
-    } catch (e) {
-      // console.error(e)
-    }
-  }, INTERVAL * 1000)
+  scheduleCalculation(graph, exchange)
 })()
 
 async function setupGraph (exchange) {
@@ -43,6 +35,17 @@ async function setupGraph (exchange) {
   return graph
 }
 
+async function scheduleCalculation (graph, exchange) {
+  setTimeout(async () => {
+    try {
+      await updateWeights(graph, exchange)
+      findProfitableArbitrage(graph)
+    } catch (e) {}
+
+    scheduleCalculation(graph, exchange)
+  }, INTERVAL)
+}
+
 async function updateWeights (graph, exchange) {
   const pairs = _(graph.edges)
     .filter(e => `${e.id1}${e.id2}` === e.data.pair_code)
@@ -59,10 +62,10 @@ async function updateWeights (graph, exchange) {
     })
 }
 
-function findProfitableArbitrage (graph, minTrx, maxTrx, minRoi) {
-  const arbitrage = graph.findHighestROIArbitrage('EUR', minTrx, maxTrx)
+function findProfitableArbitrage (graph) {
+  const arbitrage = graph.findHighestROIArbitrage('EUR', MIN_TRX, MAX_TRX)
 
-  if (arbitrage.roi > minRoi) {
+  if (arbitrage.roi > MIN_ROI) {
     console.log(
       'Found profitable arbitrage: ',
       `${_.map(arbitrage, e => e.toString()).join(' > ')} = ROI: ${arbitrage.roi}%`
