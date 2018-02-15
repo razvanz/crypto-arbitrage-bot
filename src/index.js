@@ -8,21 +8,21 @@ const creds = require('../.kraken')
 const CURRENCY = argv.currency || 'EUR'
 const INTERVAL = (argv.interval ? parseFloat(argv.interval) : 2) * 1000
 const MIN_ROI = argv.minRoi ? parseFloat(argv.minRoi) : 1 // return of investment
-const MIN_TRX = argv.minTransactions ? parseInt(argv.minTransactions, 10) : 2
-const MAX_TRX = argv.maxTransactions ? parseInt(argv.maxTransactions, 10) : 3
+const MIN_TRX = argv.minTransactions ? parseInt(argv.minTransactions, 10) : 3
+const MAX_TRX = argv.maxTransactions ? parseInt(argv.maxTransactions, 10) : 4
 
 // main
 ;(async () => {
   const exchange = new KrakenClient(creds)
   const balances = await exchange.getBalance()
-  const currencyBalance = _.get(_.find(balances, { name: CURRENCY }), 'amount')
+  // const currencyBalance = _.get(_.find(balances, { name: CURRENCY }), 'amount')
 
   console.log('Account balances: ', _.map(balances, b => `${b.name}=${b.amount}`).join(' '))
 
   // Require balance in currency
-  if (!currencyBalance) {
-    throw new Error(`Zero balance available for currency: ${CURRENCY}`)
-  }
+  // if (!currencyBalance) {
+  //   throw new Error(`Zero balance available for currency: ${CURRENCY}`)
+  // }
 
   // For now fail if there are balances in other currencies. Just to avoid issues.
   // if (balances.length > 1) {
